@@ -1,4 +1,5 @@
 from datetime import datetime,timedelta
+from pathlib import Path
 import yfinance as yf
 import pandas as pd
 import ta
@@ -7,16 +8,17 @@ import requests
 
 START = datetime.now()-timedelta(days=300)
 END = datetime.now()
-CURRENT_TICKERS = json.load(open('static_backend/current_tickers.json'))
+STATIC_DIR = Path(__file__).parent / "static_backend"
+CURRENT_TICKERS = json.load(open(STATIC_DIR / 'current_tickers.json'))
 
 # get NASDAQ tickers
 def get_nasdaq():
-    tickers = json.load(open('static_backend/nasdaq_tickers.json'))
+    tickers = json.load(open(STATIC_DIR / 'nasdaq_tickers.json'))
     return tickers
 
 # get NYSE tickers
 def get_nyse():
-    tickers = json.load(open('static_backend/nyse_tickers.json'))
+    tickers = json.load(open(STATIC_DIR / 'nyse_tickers.json'))
     return tickers
 
 # calculate Average True Range
