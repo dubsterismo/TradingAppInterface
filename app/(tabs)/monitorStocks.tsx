@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, ScrollView, Text } from "react-native";
 import { CartesianChart, Line } from "victory-native";
 import { styles } from "@/constants/_styles";
+import { API_URL } from "@/constants/api";
 
 type Stock = {
     Open: number,
@@ -19,7 +20,7 @@ export default function StockChart() {
 
     const fetchStocks = async () => {
         try {
-        const response = await fetch("http://127.0.0.1:5000/stock_charts");
+        const response = await fetch(`${API_URL}/stock_charts`);
         const json = await response.json();
         setStocksData(json);
         } 

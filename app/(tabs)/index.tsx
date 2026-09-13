@@ -4,6 +4,7 @@ import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { styles } from '@/constants/_styles'
 import { useRouter } from 'expo-router';
 import { supabase } from "@/utils/supabase";
+import { API_URL } from "@/constants/api";
 
 type StockChipProps = {
   symbol: string,
@@ -45,7 +46,7 @@ export default function Home() {
 
   const fetchStocks = async () => {
         try {
-          const response = await fetch("http://127.0.0.1:5000/home_page");
+          const response = await fetch(`${API_URL}/home_page`);
           const json: StockData[] = await response.json();
           setStocks(json);
         }
