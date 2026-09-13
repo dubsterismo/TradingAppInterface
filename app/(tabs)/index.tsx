@@ -26,6 +26,7 @@ const StockChip = ({ symbol, price, onPress }: StockChipProps) => (
 export default function Home() {
   const router = useRouter();
   const [user,setUser] = useState<any>(null);
+  const [stocks,setStocks] = useState<StockData[]>([]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
@@ -42,16 +43,12 @@ export default function Home() {
     await supabase.auth.signOut();
   };
 
-  if (!user) return <Text>Loading...</Text>
-
-  const [stocks,setStocks] = useState<StockData[]>([]);
-
   const fetchStocks = async () => {
         try {
           const response = await fetch("http://127.0.0.1:5000/home_page");
           const json: StockData[] = await response.json();
           setStocks(json);
-        } 
+        }
         catch (error) {
           console.error("Error fetching stocks:", error);
         }
@@ -65,7 +62,8 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  
+  if (!user) return <Text>Loading...</Text>
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
