@@ -1,50 +1,90 @@
-# Welcome to your Expo app 👋
+# TradingAppInterface
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A mobile stock-monitoring app: track a watchlist of tickers, see live-ish prices and
+intraday charts, and (eventually) get buy/hold/sell signals based on a couple of
+trading heuristics. Originally built to help decide what to buy or sell on a personal
+watchlist.
 
-## Get started
+**Status: paused / exploratory.** This is a personal project that was left mid-refactor.
+It is not currently in active development. See [Known Issues](#known-issues) before
+trying to run it.
 
-1. Install dependencies
+## What it does
 
-   ```bash
-   npm install
-   ```
+- Email/password auth via Supabase
+- Home screen: horizontal scroll of ticker "chips" showing the latest price, polled
+  every 5 seconds
+- "My Stocks" screen: intended to show a live intraday chart per ticker (currently
+  disabled — see Known Issues)
+- A small Flask backend that fetches quotes and OHLCV data via `yfinance`, plus early,
+  unfinished signal logic (a long-trend momentum check and a short RSI thrust check)
 
-2. Start the app
+## Stack
 
-   ```bash
-   npx expo start
-   ```
+- **App:** Expo (React Native) + Expo Router, TypeScript, Supabase JS client,
+  `victory-native` / `react-native-chart-kit` for charts
+- **Backend:** Python, Flask, `yfinance`, `pandas`, `ta`
 
-In the output, you'll find options to open the app in a
+## Setup
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### App
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Then set your own Supabase project values in `app/utils/supabase.ts` (it currently
+holds placeholders):
 
-## Learn more
+```ts
+const SUPABASE_URL = 'https://your-project-id.supabase.co';
+const SUPABASE_ANON_KEY = 'your-anon-public-key';
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+### Backend
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+cd backend
+pip install -r requirements.txt
+python app.py
+```
 
-## Join the community
+The backend must be run with `backend/` as the working directory — it loads its
+ticker lists with a path relative to `cwd`, not to the script location. It listens on
+`http://127.0.0.1:5000`, which the app currently calls directly (see Known Issues —
+this won't reach a physical device, only a simulator/emulator on the same machine).
 
-Join our community of developers creating universal apps.
+## Known Issues
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+The app is not runnable as-is. At minimum:
+
+- **Routing is broken.** Routes were moved into `app/screens/`, but Expo Router
+  requires the root layout at `app/_layout.tsx`. There is currently no root layout, so
+  navigation doesn't work.
+- **App icons are missing.** `assets/images/` was deleted from the working tree while
+  `app.json` still references icons inside it.
+- The home screen (`app/screens/(tabs)/index.tsx`) calls `useState`/`useEffect` after
+  an early `return`, which violates the Rules of Hooks and will throw once a user is
+  loaded.
+- The live chart on "My Stocks" is commented out — the screen currently only renders
+  ticker titles, no chart.
+- Both polling loops (5s intervals) have no error backoff or user-facing error state.
+- `backend/app.py` runs with `debug=True` on `0.0.0.0` — fine locally, not safe to
+  expose as-is.
+- The API base URL (`http://127.0.0.1:5000`) is hardcoded in the app rather than
+  configurable, so it only works against a local simulator/emulator.
+- `longTrendHighMomentum()` and `shortRsiThrust()` in `backend/utils.py` are unfinished
+  (no return value) and not wired to any route yet.
+- Login also writes a hardcoded `'dev-token'` to `AsyncStorage` alongside the real
+  Supabase session — leftover from early auth scaffolding.
+- `package.json` includes three overlapping UI/chart libraries
+  (`@gluestack-ui/themed`, `victory-native`, `react-native-chart-kit`) — only one is
+  meaningfully used; the others are unused leftovers from experimentation.
+
+## Roadmap ideas (not implemented)
+
+- Finish the trading-signal functions and expose them via the API
+- Re-enable and finish the intraday chart view
+- Move the API base URL to configuration/env instead of a hardcoded localhost address
+- Watchlist management (add/remove tickers) instead of a static JSON file
