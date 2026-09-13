@@ -1,32 +1,26 @@
 import { useState } from 'react';
-import { styles } from './constants/_styles'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { styles } from '../constants/_styles'
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { supabase } from '../utils/supabase';
 
 export default function RegisterScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleRegister = async () => {
-    // Simple validation
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
+    const { data,error } = await supabase.auth.signUp({ email,password });
+    if (error) setErrorMsg(error.message);
+    else router.replace('./');
+  };
 
-    // TODO: Replace with real backend signup
-    // For now, just store a dummy token in AsyncStorage
-    await AsyncStorage.setItem('userToken', 'dummy-token');
-
-    // Navigate to home page after registration
-    router.replace('/');
+  const fetchUsers = async () => {
+    const { data, error } = await supabase.from('users').select('*');
+    if (error) console.error(error);
+    else console.log(data);
   };
 
   return (
@@ -62,12 +56,18 @@ export default function RegisterScreen() {
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.button} onPress={fetchUsers}>
+        <Text style={styles.buttonText}>Auth in console</Text>
+      </TouchableOpacity>
+
       <Text style={styles.footerText}>
         Already have an account?{' '}
-        <Text style={styles.link} onPress={() => router.push('/login')}>
+        <Text style={styles.link} onPress={() => router.replace('./login')}>
           Log in
         </Text>
       </Text>
+
+      {errorMsg ? <Text style={styles.error}>{errorMsg}</Text> : null}
     </View>
   );
 }

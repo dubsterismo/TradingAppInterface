@@ -1,24 +1,21 @@
 import { useState } from 'react';
-import { styles } from './constants/_styles'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { styles } from '../constants/_styles'
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../utils/supabase';
 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  const handleLogin = async () => { // REPLACED WITH NOT FOUND PAGE TEMPORARILY
-    // console.log('Logging in with:', email, password);
-    // // Replace this with real authentication later
-    // if (email && password) {
-    //     await AsyncStorage.setItem('userToken', 'dummy-token');
-    //     router.replace('/'); // redirect to home after login
-    // } else {
-    //     alert('Please enter valid credentials');
-    // }
-    router.push('/notFound');
+  const [errorMsg, setErrorMsg] = useState('');
+  
+  const handleLogin = async () => { 
+    const { data,error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) setErrorMsg(error.message);
+    else router.replace('./');
+    console.log('Login:',email)
   };
 
   // TEMPORARY DEV LOGIN ROUTE
@@ -26,7 +23,7 @@ export default function LoginScreen() {
     await AsyncStorage.setItem('userToken', 'dev-token');
     await AsyncStorage.setItem('user', JSON.stringify({ id: 'dev-user',email}));
 
-    router.replace('/');
+    router.replace('./(tabs)/index');
     console.log('Developer login.');
   }
 
@@ -58,8 +55,9 @@ export default function LoginScreen() {
       </TouchableOpacity>
 
       <Text style={styles.footerText}>
-        New here? <Text style={styles.link} onPress={() => router.push('/register')}>Register</Text>
+        New here? <Text style={styles.link} onPress={() => router.replace('./register')}>Register</Text>
       </Text>
+      {errorMsg ? <Text style={styles.error}>{errorMsg}</Text> : null}
     </View>
   );
 }
