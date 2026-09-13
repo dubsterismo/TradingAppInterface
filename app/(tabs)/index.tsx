@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
-import { styles } from '../../constants/_styles'
+import { styles } from '@/constants/_styles'
 import { useRouter } from 'expo-router';
-import { supabase } from "@/app/utils/supabase";
+import { supabase } from "@/utils/supabase";
 
 type StockChipProps = {
   symbol: string,

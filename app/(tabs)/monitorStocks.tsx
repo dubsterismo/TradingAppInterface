@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, ScrollView, Text } from "react-native";
 import { CartesianChart, Line } from "victory-native";
-import { styles } from "../../constants/_styles";
+import { styles } from "@/constants/_styles";
 
 type Stock = {
     Open: number,

@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
 import { useRouter} from 'expo-router';
-import { styles } from '../constants/_styles';
+import { styles } from '@/constants/_styles';
 
 export default function NotFound() {
   const router = useRouter();

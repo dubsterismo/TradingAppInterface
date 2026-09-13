@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { styles } from '../constants/_styles'
+import { styles } from '@/constants/_styles'
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { supabase } from '../utils/supabase';
+import { supabase } from '@/utils/supabase';
 
 export default function LoginScreen() {
   const router = useRouter();
